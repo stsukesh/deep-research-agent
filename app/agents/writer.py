@@ -1,18 +1,3 @@
-"""
-Report Writer Agent (Agent 5)
-=============================
-WHAT: Generates a professional research report from structured findings.
-HOW:  Uses get_fast_llm() (Groq 8b-instant, 500+ tok/sec) — the fastest
-      available model — to generate a concise 600-900 word markdown report.
-WHY:  Report writing is token-generation-heavy. Using the fastest model
-      (not the most capable) is the correct trade-off for sub-30s output.
-
-SPEED OPTIMIZATIONS:
-  - get_fast_llm(): Groq 8b-instant generates at 500+ tok/sec vs NVIDIA's ~80
-  - Target 600-900 words (was 1500-2500) — 3x fewer tokens to generate
-  - Top 12 findings only sent to LLM (was all findings) — smaller input
-"""
-
 from app.agents.llm_factory import get_fast_llm
 from langchain_core.messages import SystemMessage, HumanMessage
 
@@ -107,4 +92,3 @@ Write the full report now. Be concise (600-900 words)."""
             ),
         ],
     }
-

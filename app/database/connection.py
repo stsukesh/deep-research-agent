@@ -1,32 +1,3 @@
-"""
-Database Connection
-===================
-WHAT: SQLAlchemy async engine and session factory for the app database.
-HOW:  Uses create_async_engine with asyncpg driver. Sessions are created via
-      async_sessionmaker and used as context managers for automatic cleanup.
-WHY:  The app needs its own database tables (ResearchJob, Report) separate
-      from LangGraph's checkpoint tables. They share the same PostgreSQL
-      instance but have different schemas and connection libraries.
-
-CONNECTION MANAGEMENT:
-  - Engine: One per app lifetime (connection pool manager)
-  - Session: One per request/operation (unit of work)
-  - Uses async context managers for automatic commit/rollback/close
-
-INTERVIEW Q&A:
-  Q: Why use async SQLAlchemy with asyncpg?
-  A: FastAPI is async. Using sync database calls would block the event loop,
-     killing concurrency. asyncpg is the fastest async PostgreSQL driver.
-     SQLAlchemy 2.0+ has native async support via create_async_engine.
-     
-  Q: Why separate from the LangGraph checkpointer connection?
-  A: LangGraph's checkpointer uses psycopg3 (not asyncpg) because that's what
-     langgraph-checkpoint-postgres requires internally. Our app uses asyncpg via
-     SQLAlchemy for its own tables. Same database, different drivers — this is
-     normal in production systems where different libraries have different
-     driver requirements.
-"""
-
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from app.config import get_settings
 

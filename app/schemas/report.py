@@ -1,23 +1,3 @@
-"""
-Report Schema
-=============
-WHAT: Defines the Reviewer Agent's structured verdict on report quality.
-HOW:  ReviewResult has status ("approved"/"rewrite"), feedback, missing sections, score.
-      The Reviewer uses `with_structured_output(ReviewResult)` to produce this.
-WHY:  The conditional edge after the Reviewer checks `status` to decide:
-      - "approved" → END (report is final)
-      - "rewrite"  → Writer (try again with feedback)
-      This structured output drives the graph's control flow.
-
-INTERVIEW Q&A:
-  Q: How does the Reviewer control the graph flow?
-  A: The Reviewer produces a structured ReviewResult with status "approved" or
-     "rewrite." The conditional edge function reads this status and routes to
-     either END or back to the Writer. The feedback field contains specific
-     instructions for improvement, so the Writer knows exactly what to fix.
-     I cap revisions at MAX_REVISIONS (default 3) to prevent infinite loops.
-"""
-
 from typing import Literal
 from pydantic import BaseModel, Field
 

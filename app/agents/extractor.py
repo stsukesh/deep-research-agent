@@ -1,32 +1,3 @@
-"""
-Information Extraction Agent (Agent 3)
-======================================
-WHAT: Transforms messy raw search results into clean, structured Finding objects.
-HOW:  Uses `with_structured_output(FindingsList)` to force the LLM to extract only
-      verifiable facts with source attribution and confidence scores.
-WHY:  Raw search results contain ads, irrelevant text, duplicate info. The Extractor
-      acts as a data cleaning pipeline — only verified, attributed facts survive.
-
-FLOW:
-  Input:  state["search_results"] = [{"topic": "...", "content": "messy text..."}, ...]
-  Output: state["findings"] = [{"fact": "...", "source": "...", "confidence": 0.92}, ...]
-
-INTERVIEW Q&A:
-  Q: What is information extraction and why is it a separate agent?
-  A: Information extraction is the process of transforming unstructured text into
-     structured data. It's a separate agent because extraction requires different
-     skills than searching. The Researcher is optimized for breadth (finding data),
-     the Extractor for precision (filtering noise). Separation of concerns also
-     makes each agent testable in isolation.
-     
-  Q: How do you calculate confidence scores?
-  A: The LLM assigns confidence based on: (1) source reliability — Reuters gets
-     higher confidence than a random blog, (2) corroboration — facts mentioned
-     by multiple sources get boosted, (3) recency — newer data gets slightly
-     higher confidence for market analysis. These are LLM-assessed heuristics,
-     not algorithmic calculations.
-"""
-
 from app.agents.llm_factory import get_llm
 from langchain_core.messages import SystemMessage, HumanMessage
 

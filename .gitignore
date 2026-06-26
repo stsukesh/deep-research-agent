@@ -3,9 +3,10 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+
+#github
 key
 key.pub
-
 # Virtual environments
 venv/
 .venv/

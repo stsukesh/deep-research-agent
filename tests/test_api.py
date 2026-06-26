@@ -1,10 +1,3 @@
-"""
-Tests for FastAPI Endpoints
-============================
-Tests the REST API using httpx AsyncClient.
-Verifies all CRUD operations and the HIL approval flow.
-"""
-
 import pytest
 import pytest_asyncio
 from httpx import AsyncClient, ASGITransport

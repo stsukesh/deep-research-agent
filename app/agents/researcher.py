@@ -1,37 +1,3 @@
-"""
-Researcher Agent (Agent 2)
-==========================
-WHAT: Takes the research plan, iterates through topics, and calls tools to gather data.
-HOW:  For each topic, constructs targeted search queries and invokes Tavily, DuckDuckGo,
-      Wikipedia, and Arxiv. Results are accumulated in state["search_results"].
-WHY:  This is the data-gathering workhorse. It uses ALL available tools to build a
-      comprehensive knowledge base before the Extractor refines it.
-
-FLOW:
-  Input:  state["research_plan"]["topics"] = ["Revenue", "AI Products", "Competition", ...]
-  Output: state["search_results"] = [{"topic": "...", "source": "...", "content": "..."}, ...]
-
-TOOL SELECTION STRATEGY:
-  - Business/market topics → Tavily + DuckDuckGo (real-time data)
-  - Technical topics → Arxiv (academic papers)
-  - Background/history → Wikipedia (authoritative context)
-  - All topics get at least one web search for recency
-
-INTERVIEW Q&A:
-  Q: How does the agent decide which tool to use?
-  A: I use a keyword-based routing strategy. Topics containing words like
-     "technical," "algorithm," or "architecture" route to Arxiv. Topics with
-     "history" or "background" route to Wikipedia. All topics get a Tavily
-     search for current data. This isn't AI-based routing — it's deterministic
-     logic that ensures diverse source coverage.
-     
-  Q: How do you handle API failures and rate limits?
-  A: Each tool call is wrapped in try/except with fallback. If Tavily fails,
-     we fall back to DuckDuckGo. If all web searches fail for a topic, we
-     log the error and continue to the next topic. The system is resilient —
-     partial results are better than no results.
-"""
-
 import asyncio
 from langchain_core.messages import SystemMessage
 
@@ -154,4 +120,3 @@ async def researcher_node(state: GraphState) -> dict:
             ),
         ],
     }
-

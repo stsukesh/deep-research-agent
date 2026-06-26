@@ -1,20 +1,3 @@
-"""
-Configuration Management
-========================
-WHAT: Centralizes all app configuration (API keys, DB URLs, model names).
-HOW:  Pydantic BaseSettings auto-reads from environment variables or .env files.
-WHY:  12-factor app pattern — config lives in the environment, never hardcoded.
-      This means the same code runs in dev, staging, and production with different
-      env vars. Docker Compose injects these via the `environment:` section.
-
-INTERVIEW Q&A:
-  Q: How do you manage secrets and configuration in production?
-  A: I use Pydantic BaseSettings which reads from environment variables.
-     API keys are injected via Docker Compose env vars (or Kubernetes secrets).
-     Never committed to git — only .env.example is tracked. The BaseSettings
-     class provides type validation, defaults, and documentation all in one place.
-"""
-
 from pydantic_settings import BaseSettings
 from functools import lru_cache
 

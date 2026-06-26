@@ -1,36 +1,3 @@
-"""
-Evaluation Metrics
-==================
-WHAT: Tracks performance metrics for every research run.
-HOW:  ResearchMetrics dataclass captures timing, counts, and scores.
-      collect_metrics() extracts these from the final graph state.
-WHY:  Most candidates never evaluate their AI systems. Adding metrics shows
-      you think about production concerns: latency, reliability, quality.
-
-METRICS TRACKED:
-  - research_time_seconds: Total pipeline execution time
-  - tool_calls_count: How many tool invocations (indicates API cost)
-  - citations_count: Number of unique sources cited (quality indicator)
-  - confidence_average: Mean confidence across all findings
-  - revision_count: How many Writer ← Reviewer cycles
-  - topics_researched: Number of topics covered
-  - findings_count: Total structured findings extracted
-
-INTERVIEW Q&A:
-  Q: How do you evaluate the quality of your AI system?
-  A: I track quantitative metrics per research job: execution time, tool calls,
-     unique citations, average confidence, revision cycles, and findings count.
-     These are stored in PostgreSQL and exposed via /metrics endpoint. Over time,
-     I can identify patterns — queries with low confidence might need better
-     tools, high revision counts suggest prompt improvements are needed.
-     
-  Q: What would you add for a more advanced evaluation?
-  A: Factual accuracy verification (check citations still resolve), user
-     satisfaction scoring (thumbs up/down on reports), A/B testing different
-     prompts, LLM-as-judge evaluation (use a separate LLM to score report
-     quality), and token cost tracking per query for budget optimization.
-"""
-
 import time
 from dataclasses import dataclass, asdict
 from app.graph.state import GraphState

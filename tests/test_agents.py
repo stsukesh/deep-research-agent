@@ -1,19 +1,3 @@
-"""
-Tests for Individual Agent Nodes
-=================================
-Tests each agent in isolation by providing mock state inputs
-and verifying the output state updates are correct.
-
-INTERVIEW Q&A:
-  Q: How do you test AI agents?
-  A: I test at two levels: (1) Unit tests mock the LLM and verify state
-     transformations — does the Planner return a valid research_plan dict?
-     Does the Extractor return findings with confidence scores? (2) Integration
-     tests run the full graph with a real LLM but mocked tools. The key insight
-     is that agent nodes are just async functions that take state and return
-     state updates — they're fully testable.
-"""
-
 import pytest
 from unittest.mock import AsyncMock, patch, MagicMock
 from app.graph.state import GraphState
@@ -273,5 +257,3 @@ def test_llm_factory_returns_primary_only():
         llm = get_llm(temperature=0.1)
         
         assert isinstance(llm, ChatGroq)
-
-

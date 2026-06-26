@@ -1,32 +1,3 @@
-"""
-Planner Agent (Agent 1)
-=======================
-WHAT: Converts a vague user query into a structured ResearchPlan.
-HOW:  Uses ChatGroq with `with_structured_output(ResearchPlan)` to force the LLM
-      to return valid JSON matching our Pydantic schema.
-WHY:  Vague queries like "Analyze Nvidia" produce bad research. The Planner
-      decomposes it into specific, actionable topics like "Revenue Analysis,"
-      "AI Product Portfolio," "Competitive Landscape," etc.
-
-FLOW:
-  Input:  state["query"] = "Analyze Nvidia's AI business strategy for 2026"
-  Output: state["research_plan"] = {"topics": [...], "objectives": [...], "scope": "..."}
-
-INTERVIEW Q&A:
-  Q: How do you handle ambiguous user queries?
-  A: The Planner Agent uses a system prompt that instructs the LLM to decompose
-     any vague query into 3-7 concrete research sub-topics. The LLM is forced to
-     output a ResearchPlan Pydantic model via with_structured_output(). If the
-     query is too broad, the Planner narrows the scope. If too narrow, it
-     expands to cover related dimensions.
-     
-  Q: What if the LLM returns invalid JSON?
-  A: with_structured_output() handles this automatically. For models supporting
-     tool calling (like Llama 3.3), it uses the native function-calling API which
-     is more reliable. If JSON is still invalid, LangChain retries with an error
-     message asking the LLM to fix the format.
-"""
-
 from app.agents.llm_factory import get_llm
 from langchain_core.messages import SystemMessage, HumanMessage
 

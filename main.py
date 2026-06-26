@@ -1,20 +1,3 @@
-"""
-Enterprise Research Agent — Main Entry Point
-=============================================
-WHAT: FastAPI application setup with CORS, static files, and router mounting.
-HOW:  Creates FastAPI app, configures middleware, mounts the API router,
-      and serves the static web UI.
-WHY:  This is the single entry point for the entire application.
-      `uvicorn main:app` starts everything.
-
-INTERVIEW Q&A:
-  Q: How do you structure a FastAPI application?
-  A: I use a modular structure — routes in a separate module, mounted via
-     APIRouter with a prefix. Static files are served via StaticFiles mount.
-     CORS middleware enables the web UI to call the API. Lifespan events
-     handle startup (DB init) and shutdown (connection cleanup).
-"""
-
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -89,5 +72,3 @@ async def serve_ui():
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", host="0.0.0.0", port=7860, reload=True)
-
-

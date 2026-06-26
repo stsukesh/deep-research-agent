@@ -1,32 +1,3 @@
-"""
-LLM Factory
-===========
-WHAT: Centralized factory for instantiating LLM models with built-in fallbacks.
-HOW:  Creates a primary ChatGroq instance, and wraps it with a ChatOpenAI fallback
-      pointing to NVIDIA NIM if NVIDIA_API_KEY is available.
-WHY:  To prevent 429 Rate Limit exceeded errors from blocking agent workflows.
-
-CRITICAL SETTINGS:
-  - max_retries=0 on ChatGroq: Disables Groq's internal retry loop. Without this,
-    a 429 response causes the Groq client to wait and retry for hours before the
-    exception propagates to LangChain's fallback handler.
-  - request_timeout=30 on ChatGroq: Hard-caps each API call to 30 seconds. If Groq
-    hangs or is slow, this ensures the error surfaces quickly so NVIDIA NIM can
-    take over immediately.
-
-INTERVIEW Q&A:
-  Q: Why set max_retries=0 instead of letting Groq retry?
-  A: Groq's internal retries block the asyncio event loop and bypass the LangChain
-     fallback mechanism. By disabling them, any failure (429, 5xx, timeout) is
-     immediately raised as an exception, which RunnableWithFallbacks catches and
-     routes to the NVIDIA NIM model — giving us fast, transparent failover.
-
-  Q: What is RunnableWithFallbacks?
-  A: A LangChain wrapper that runs the primary model, catches any exception, and
-     transparently retries using the next model in the fallbacks list. It's the
-     standard pattern for multi-provider LLM resilience.
-"""
-
 from langchain_groq import ChatGroq
 from langchain_openai import ChatOpenAI
 from app.config import get_settings

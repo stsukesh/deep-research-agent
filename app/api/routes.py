@@ -1,22 +1,3 @@
-"""
-FastAPI Routes
-==============
-WHAT: REST API endpoints for the research agent system.
-HOW:  FastAPI router with async endpoints. Graph uses AsyncPostgresSaver (Neon)
-      so all state is durable — jobs survive server restarts.
-WHY:  The API decouples the client from the agent execution. Clients submit
-      research requests, poll for status, approve findings, and retrieve reports.
-
-ENDPOINTS:
-  POST /research       → Start a new research job (async)
-  GET  /status/{id}    → Check job status + findings (for approval)
-  POST /approve/{id}   → Approve or reject findings (HIL)
-  GET  /report/{id}    → Get the final report
-  GET  /jobs           → List all research jobs
-  GET  /metrics/{id}   → Get evaluation metrics
-  GET  /health         → Health check
-"""
-
 import asyncio
 import time
 import uuid

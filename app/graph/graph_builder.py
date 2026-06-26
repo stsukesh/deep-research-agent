@@ -1,34 +1,3 @@
-"""
-Graph Builder
-=============
-WHAT: Assembles the complete LangGraph StateGraph — wires all nodes, edges,
-      conditional edges, and compiles with a PostgreSQL checkpointer (Neon).
-HOW:  1. Creates StateGraph(GraphState)
-      2. Adds each agent as a node
-      3. Defines linear edges (A → B) and conditional edges (A → B or C)
-      4. Compiles with AsyncPostgresSaver (Neon cloud Postgres)
-WHY:  PostgreSQL checkpointer enables:
-      (1) Human-in-the-loop — interrupt() serializes state to DB
-      (2) Fault tolerance — server restarts don't lose in-flight jobs
-      (3) Time-travel debugging — replay any checkpoint
-
-GRAPH FLOW:
-  START → Planner → Researcher → Extractor → Human Approval
-                                                    │
-                                         ┌──────────┴──────────┐
-                                         │ approved            │ rejected
-                                         ▼                     ▼
-                                       Writer              Researcher
-                                         │                  (re-run)
-                                         ▼
-                                      Reviewer
-                                    ┌────┴────┐
-                                    │approved │rewrite
-                                    ▼         ▼
-                                   END      Writer
-                                           (re-run)
-"""
-
 from langgraph.graph import StateGraph, START, END
 from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
 
@@ -118,4 +87,3 @@ def build_graph(checkpointer=None):
     from langgraph.checkpoint.memory import MemorySaver
     cp = checkpointer or MemorySaver()
     return _build_workflow().compile(checkpointer=cp)
-
