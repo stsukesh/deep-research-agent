@@ -1,152 +1,165 @@
-# 🌐 Enterprise Research & Report Generation Agent
+# 🌐 Enterprise Multi-Agent Research & Report Generation System
 
-> **Multi-agent AI research system** that autonomously plans, researches, extracts, writes, and reviews professional reports — with human-in-the-loop approval, persistent memory, and evaluation metrics.
+An advanced multi-agent AI research pipeline that autonomously plans, researches, extracts, writes, and evaluates professional reports. 
 
-![Python](https://img.shields.io/badge/Python-3.12-blue)
-![LangGraph](https://img.shields.io/badge/LangGraph-0.4+-purple)
-![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-green)
-![Docker](https://img.shields.io/badge/Docker-Compose-blue)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue)
+Built with **LangGraph**, **FastAPI**, and **Neon PostgreSQL**, this system implements key production-grade patterns: **Human-in-the-Loop approval**, **durable state persistence across restarts**, and **resilient LLM fallbacks**.
 
-## 🏗️ Architecture
+---
+
+## 🏗️ System Architecture & Workflow
+
+The agent orchestrates six specialized sub-agents inside a cyclic LangGraph `StateGraph`:
 
 ```
-START → Planner → Researcher → Extractor → Human Approval
-                                                │
-                                     ┌──────────┴──────────┐
-                                     │ approved            │ rejected
-                                     ▼                     ▼
-                                   Writer              Researcher
-                                     │                  (re-run)
-                                     ▼
-                                  Reviewer
-                                ┌────┴────┐
-                                │approved │rewrite
-                                ▼         ▼
-                               END      Writer
+                    START
+                      │
+                      ▼
+                   Planner ──► Researcher ──► Extractor
+                                  ▲              │
+                                  │              ▼
+                                  └── [Reject] ── Approval (Interrupt)
+                                                 │
+                                                 ├── [Approve]
+                                                 ▼
+                                              Writer ◄───┐
+                                                 │       │ [Rewrite]
+                                                 ▼       │
+                                              Reviewer ──┘
+                                                 │
+                                                 └── [Approve] ──► END
 ```
 
-## ✨ Key Features
+### 👥 The 6 Specialized Agents
+1. **Planner**: Breaks the research query into target topics, scope, and objectives.
+2. **Researcher**: Parallelized searches across Tavily, Wikipedia, Arxiv, and DuckDuckGo.
+3. **Extractor**: Translates raw results into structured Pydantic findings with confidence ratings.
+4. **Approval (Human-in-the-Loop)**: Interrupts the graph, serializes state to PostgreSQL, and waits for user feedback.
+5. **Writer**: Synthesizes verified findings into a beautifully structured Markdown report.
+6. **Reviewer**: Grades the report against criteria, prompting a rewrite loop if standards are not met.
 
-| Feature | Technology | Description |
-|---------|-----------|-------------|
-| **Graph Orchestration** | LangGraph | Cyclic StateGraph with conditional edges |
-| **6 Specialized Agents** | LangChain + Groq | Planner, Researcher, Extractor, Approval, Writer, Reviewer |
-| **Tool Calling** | Tavily, Wikipedia, Arxiv, DuckDuckGo | Multi-source research |
-| **Structured Output** | Pydantic | Forced JSON schema compliance |
-| **Human-in-the-Loop** | LangGraph interrupt() | Pause/resume with persistent state |
-| **Memory & Checkpointing** | PostgreSQL | Full state persistence across restarts |
-| **Evaluation Pipeline** | Custom metrics | Time, tool calls, confidence, citations |
-| **REST API** | FastAPI | Async endpoints with background tasks |
-| **Web UI** | Vanilla JS | Pipeline visualization + approval workflow |
-| **Containerized** | Docker Compose | One-command deployment |
+---
 
-## 🚀 Quick Start
+## ✨ Advanced Production Patterns
 
-### 1. Clone & Setup
-```bash
-cd enterprise-research-agent
-cp .env.example .env
-# Edit .env with your API keys
-```
+### 1. Durable PostgreSQL State Checkpointing (Neon Cloud)
+Instead of using memory-only checkpointers (which lose state if the server restarts), we use LangGraph's `AsyncPostgresSaver`. 
+- State checkpoints are written to Neon cloud Postgres after *every single node execution*.
+- Enables **fault-tolerant human-in-the-loop**: the server can shut down or restart while a job is `awaiting_approval`. Once the user hits the `/api/approve` endpoint, the graph resumes execution from the exact checkpoint stored in Postgres.
+- Database health checking is integrated directly into the startup lifecycle.
 
-### 2. Add API Keys to `.env`
-```
-GROQ_API_KEY=your_groq_key
-TAVILY_API_KEY=your_tavily_key
-```
+### 2. Dual LLM Provider Fallbacks & Token Limit Optimization
+To solve API rate-limits and token exhaustion:
+- **Primary LLM**: **NVIDIA NIM** (`meta/llama-3.3-70b-instruct` via OpenAI compatible endpoints). It handles high-reasoning, structured extraction tasks without daily token limits.
+- **Fallback LLM**: **Groq** (`llama-3.1-8b-instant` or `llama-3.3-70b-versatile` with `max_retries=0`). If NVIDIA NIM is slow or unavailable, LangChain's `RunnableWithFallbacks` transparently fails over to Groq.
+- **Fast-Path Generation**: The Writer and Reviewer agents use a specialized fast-path LLM (Groq 8B) running at **500+ tokens/second** to produce large Markdown reports in under 5 seconds, rather than waiting 90 seconds on a 70B model.
 
-### 3. Run with Docker
-```bash
-docker-compose up --build
-```
+### 3. Quantitative Evaluation Metrics
+Every completed report records a set of metrics saved directly to the database:
+- Total execution time.
+- Number of tool invocations.
+- Average confidence score across all extracted sources.
+- Number of cited references.
 
-### 4. Run Locally (Development)
-```bash
-python -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-python main.py
-```
+---
 
-### 5. Open the App
-- **Web UI**: http://localhost:7860
-- **API Docs**: http://localhost:7860/docs
-- **Health Check**: http://localhost:7860/api/health
+## 📡 REST API Endpoints
 
-## 📡 API Endpoints
+FastAPI endpoints manage the pipeline asynchronously, running agents as background tasks:
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| `POST` | `/api/research` | Start a new research job |
-| `GET` | `/api/status/{id}` | Check job status + findings |
-| `POST` | `/api/approve/{id}` | Approve/reject findings (HIL) |
-| `GET` | `/api/report/{id}` | Get the final report |
-| `GET` | `/api/jobs` | List all research jobs |
-| `GET` | `/api/metrics/{id}` | Get evaluation metrics |
-| `GET` | `/api/health` | Health check |
+| `POST` | `/api/research` | Start a new research job (returns `job_id`) |
+| `GET` | `/api/status/{job_id}` | Retrieve job state, progress, and findings for approval |
+| `POST` | `/api/approve/{job_id}` | Approve findings or submit feedback to reject them |
+| `GET` | `/api/report/{job_id}` | Retrieve the final generated markdown report |
+| `GET` | `/api/jobs` | List all historical research jobs |
+| `GET` | `/api/metrics/{job_id}` | Retrieve quantitative evaluation metrics |
+| `GET` | `/api/health` | Check FastAPI service and Neon Postgres connection health |
 
-### Example Usage
-```bash
-# Start research
-curl -X POST http://localhost:7860/api/research \
-  -H "Content-Type: application/json" \
-  -d '{"query": "Analyze Nvidia AI business strategy for 2026"}'
+---
 
-# Check status (returns findings when awaiting approval)
-curl http://localhost:7860/api/status/{job_id}
+## 🚀 Getting Started
 
-# Approve findings
-curl -X POST http://localhost:7860/api/approve/{job_id} \
-  -H "Content-Type: application/json" \
-  -d '{"approved": true}'
+### 1. Environment Configuration
+Create a `.env` file in the root directory:
+```env
+# LLM Providers
+NVIDIA_API_KEY=nvapi-your-key
+NVIDIA_MODEL=meta/llama-3.3-70b-instruct
 
-# Get report
-curl http://localhost:7860/api/report/{job_id}
+GROQ_API_KEY=gsk_your-key
+GROQ_MODEL=llama-3.1-8b-instant
+
+# Search Integration
+TAVILY_API_KEY=tvly-your-key
+
+# Database Connection URLs (Neon PostgreSQL)
+DATABASE_URL=postgresql+asyncpg://neondb_owner:password@host/neondb?ssl=require
+CHECKPOINT_DB_URL=postgresql://neondb_owner:password@host/neondb?sslmode=require
+
+# App Configuration
+APP_ENV=development
+MAX_REVISIONS=1
 ```
 
-## 🧪 Testing
+### 2. Run with Docker (Recommended)
+Build and start the application in one command:
 ```bash
+docker compose up --build -d
+```
+
+### 3. Run Locally (Development)
+Ensure you have Python 3.12+ installed:
+```bash
+# Set up virtual environment
+python -m venv venv
+source venv/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Start local server
+python main.py
+```
+
+- **Web Dashboard**: [http://localhost:7860](http://localhost:7860)
+- **API Documentation**: [http://localhost:7860/docs](http://localhost:7860/docs)
+
+---
+
+## 🧪 Testing
+
+The repository includes a suite of isolation tests for agent nodes and integration tests for FastAPI REST controllers:
+
+```bash
+# Run tests inside docker container
+docker compose exec app pytest
+
+# Run tests locally
 pytest tests/ -v
 ```
 
+---
+
 ## 📂 Project Structure
+
 ```
 enterprise-research-agent/
 ├── app/
-│   ├── agents/           # 6 specialized agents
-│   │   ├── planner.py    # Query → Research Plan
-│   │   ├── researcher.py # Plan → Search Results
-│   │   ├── extractor.py  # Results → Structured Findings
-│   │   ├── approval.py   # Human-in-the-Loop (interrupt)
-│   │   ├── writer.py     # Findings → Professional Report
-│   │   └── reviewer.py   # QA Review → Approve/Rewrite
-│   ├── tools/            # Search tool integrations
-│   ├── graph/            # State design + graph builder
-│   ├── schemas/          # Pydantic models (structured output)
-│   ├── api/              # FastAPI routes
-│   ├── database/         # SQLAlchemy models + connection
-│   └── evaluations/      # Metrics tracking
-├── static/               # Web UI (HTML/CSS/JS)
-├── tests/                # Unit + integration tests
-├── Dockerfile
-├── docker-compose.yml
-└── main.py
+│   ├── agents/           # Specialized agent nodes (Planner, Writer, etc.)
+│   │   └── llm_factory.py# Resilient LLM config with fallback logic
+│   ├── tools/            # Tavily, DDG, Wikipedia, and Arxiv integrations
+│   ├── graph/            # LangGraph StateGraph definition
+│   ├── api/              # FastAPI APIRouter handlers
+│   ├── database/         # SQLAlchemy ORM models & session connections
+│   └── evaluations/      # Citations & duration metrics collector
+├── static/               # Frontend dashboard (HTML/CSS/JS)
+├── tests/                # Unit & API integration tests
+├── Dockerfile            # Container build specification
+├── docker-compose.yml    # Service orchestration
+└── main.py               # Fast API entry point and application lifespan
 ```
-
-## 🧠 Skills Demonstrated
-
-- **LangGraph**: StateGraph, conditional edges, cycles, reducers
-- **Agents**: 6 specialized agents with distinct responsibilities
-- **Tool Calling**: Multi-tool research (Tavily, Wikipedia, Arxiv, DuckDuckGo)
-- **Structured Output**: Pydantic schema enforcement via with_structured_output()
-- **Human-in-the-Loop**: interrupt() + Command(resume=...) for approval workflows
-- **Memory**: PostgreSQL checkpointer for persistent state
-- **FastAPI**: Async REST API with background tasks
-- **Docker**: Multi-service deployment with docker-compose
-- **Testing**: Unit tests for agents + API endpoint tests
-- **Evaluation**: Quantitative metrics pipeline
 
 ## 📝 License
 
-MIT
+This project is licensed under the MIT License.

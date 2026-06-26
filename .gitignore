@@ -7,19 +7,31 @@ __pycache__/
 venv/
 .venv/
 env/
+ENV/
+build/
+dist/
+*.egg-info/
 
 # Environment variables
 .env
+.env.*
+!.env.example
 
-# IDE
+# IDEs
 .vscode/
 .idea/
 *.swp
 *.swo
+*.sublime-project
+*.sublime-workspace
 
 # OS
 .DS_Store
+*.har
 Thumbs.db
+db.sqlite3
+*.db
+*.log
 
 # PostgreSQL data (managed by Docker volume)
 pgdata/
@@ -28,3 +40,5 @@ pgdata/
 .pytest_cache/
 htmlcov/
 .coverage
+.coverage.*
+.pytest_cache/
