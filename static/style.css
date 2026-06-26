@@ -586,14 +586,70 @@ body {
 
 .report-header {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
     margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+}
+
+.report-header-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+}
+
+.report-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-report-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    background: var(--bg-glass);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    font-family: var(--font-main);
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-smooth);
+    white-space: nowrap;
+}
+
+.btn-report-action:hover {
+    background: rgba(108, 92, 231, 0.1);
+    border-color: var(--border-accent);
+    color: var(--accent-secondary);
+    transform: translateY(-1px);
+}
+
+.btn-report-action-accent {
+    background: rgba(108, 92, 231, 0.1);
+    border-color: var(--border-accent);
+    color: var(--accent-secondary);
+}
+
+.btn-report-action-accent:hover {
+    background: rgba(108, 92, 231, 0.2);
+    box-shadow: 0 2px 12px rgba(108, 92, 231, 0.2);
+}
+
+.btn-report-action.copied {
+    background: rgba(0, 184, 148, 0.15);
+    border-color: var(--success);
+    color: var(--success);
 }
 
 .report-meta {
     display: flex;
     gap: 12px;
+    flex-wrap: wrap;
 }
 
 .meta-tag {

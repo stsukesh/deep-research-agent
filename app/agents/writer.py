@@ -8,16 +8,18 @@ WRITER_SYSTEM_PROMPT = """You are a research report writer. Write concise, profe
 
 Required sections (ALL must be present, each 1-2 paragraphs):
 # Executive Summary
+# Market Overview
 # Key Findings  
 # Competitive Analysis
-# Risks & Opportunities
+# Risks & Challenges
+# Growth Opportunities
 # Final Assessment
 # References
 
 Rules:
 - Use inline citations [Source] for every factual claim
 - Be specific: use numbers, dates, percentages when available
-- Target 600-900 words total — tight and impactful, no padding
+- Target 700-1000 words total — tight and impactful, no padding
 - Professional tone, markdown formatting"""
 
 

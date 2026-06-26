@@ -121,7 +121,23 @@
         <section class="report-section hidden" id="report-section">
             <div class="report-header">
                 <h2 class="section-title-sm">Generated Report</h2>
-                <div class="report-meta" id="report-meta"></div>
+                <div class="report-header-right">
+                    <div class="report-meta" id="report-meta"></div>
+                    <div class="report-actions">
+                        <button class="btn-report-action" id="btn-copy-report" onclick="copyReport()" title="Copy report as markdown">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                            </svg>
+                            <span>Copy</span>
+                        </button>
+                        <button class="btn-report-action btn-report-action-accent" id="btn-download-pdf" onclick="downloadPdf()" title="Download report as PDF">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+                            </svg>
+                            <span>Download PDF</span>
+                        </button>
+                    </div>
+                </div>
             </div>
             <div class="report-content" id="report-content"></div>
         </section>

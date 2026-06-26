@@ -1,3 +1,15 @@
+---
+title: Enterprise Research Agent
+emoji: 🌐
+colorFrom: indigo
+colorTo: purple
+sdk: docker
+app_port: 7860
+pinned: false
+license: mit
+short_description: Multi-agent AI research & report generation system
+---
+
 # 🌐 Enterprise Multi-Agent Research & Report Generation System
 
 An advanced multi-agent AI research pipeline that autonomously plans, researches, extracts, writes, and evaluates professional reports. 

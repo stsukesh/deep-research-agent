@@ -349,16 +349,23 @@ async def debug_job(job_id: str):
 async def health_check():
     factory = get_session_factory()
     db_ok = False
+    error_msg = None
     try:
         async with factory() as session:
             await session.execute(select(ResearchJob).limit(1))
         db_ok = True
-    except Exception:
-        pass
+    except Exception as e:
+        import traceback
+        error_msg = f"{type(e).__name__}: {str(e)}"
+        print(f"Database health check failed: {error_msg}")
+        traceback.print_exc()
 
-    return {
+    res = {
         "status": "healthy" if db_ok else "degraded",
         "service": "enterprise-research-agent",
         "database": "neon-postgres" if db_ok else "unreachable",
         "active_jobs": len([t for t in background_tasks if not t.done()]),
     }
+    if error_msg:
+        res["database_error"] = error_msg
+    return res

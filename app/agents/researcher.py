@@ -27,8 +27,7 @@ async def _safe_invoke(tool, query: str) -> str:
 
 async def _research_topic(topic: str, query: str, feedback: str, tools: dict) -> list:
     """
-    Research a single topic using all applicable tools.
-    Designed to be run concurrently via asyncio.gather().
+    Research a single topic using all applicable tools concurrently.
     """
     topic_results = []
     topic_lower = topic.lower()
@@ -46,23 +45,36 @@ async def _research_topic(topic: str, query: str, feedback: str, tools: dict) ->
     if feedback:
         search_query = f"{search_query} {feedback}"
 
-    # === Web Search (always) ===
-    web_result = await _safe_invoke(tools["tavily"], search_query)
-    topic_results.append({"topic": topic, "source": "tavily_search", "content": web_result})
+    # Prepare concurrent tasks
+    tasks = []
+    task_keys = []
 
-    # === DuckDuckGo (complementary) ===
-    ddg_result = await _safe_invoke(tools["ddg"], search_query)
-    topic_results.append({"topic": topic, "source": "duckduckgo_search", "content": ddg_result})
+    # 1. Tavily Search (always)
+    tasks.append(_safe_invoke(tools["tavily"], search_query))
+    task_keys.append("tavily_search")
 
-    # === Wikipedia (for background topics) ===
-    if is_background or not is_technical:
-        wiki_result = await _safe_invoke(tools["wiki"], topic)
-        topic_results.append({"topic": topic, "source": "wikipedia", "content": wiki_result})
+    # 2. DuckDuckGo Search (always)
+    tasks.append(_safe_invoke(tools["ddg"], search_query))
+    task_keys.append("duckduckgo_search")
 
-    # === Arxiv (for technical topics) ===
-    if is_technical:
-        arxiv_result = await _safe_invoke(tools["arxiv"], topic)
-        topic_results.append({"topic": topic, "source": "arxiv", "content": arxiv_result})
+    # 3. Wikipedia (for background / non-technical topics)
+    run_wiki = is_background or not is_technical
+    if run_wiki:
+        tasks.append(_safe_invoke(tools["wiki"], topic))
+        task_keys.append("wikipedia")
+
+    # 4. Arxiv (for technical topics)
+    run_arxiv = is_technical
+    if run_arxiv:
+        tasks.append(_safe_invoke(tools["arxiv"], topic))
+        task_keys.append("arxiv")
+
+    # Run searches concurrently
+    results = await asyncio.gather(*tasks)
+
+    # Map results back
+    for key, result in zip(task_keys, results):
+        topic_results.append({"topic": topic, "source": key, "content": result})
 
     return topic_results
 
