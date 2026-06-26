@@ -1,0 +1,39 @@
+# ===== Core AI =====
+langgraph>=0.4
+langchain>=0.3
+langchain-groq>=0.3
+langchain-openai>=0.1
+langchain-community>=0.3
+
+# ===== LangGraph Checkpoint (PostgreSQL persistence) =====
+langgraph-checkpoint-postgres>=2.0
+psycopg[binary]>=3.2
+psycopg-pool>=3.2
+
+# ===== Search Tools =====
+tavily-python>=0.5
+langchain-tavily>=0.1
+duckduckgo-search>=7.0
+ddgs>=9.0
+wikipedia>=1.4
+arxiv>=2.1
+
+# ===== Structured Output & Validation =====
+pydantic>=2.0
+pydantic-settings>=2.0
+
+# ===== Backend =====
+fastapi>=0.115
+uvicorn[standard]>=0.34
+
+# ===== Database (App) =====
+sqlalchemy[asyncio]>=2.0
+asyncpg>=0.30
+
+# ===== Utilities =====
+python-dotenv>=1.0
+httpx>=0.28
+
+# ===== Testing =====
+pytest>=8.0
+pytest-asyncio>=0.25

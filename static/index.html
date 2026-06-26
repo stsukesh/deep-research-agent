@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enterprise Research Agent — AI-Powered Research Platform</title>
+    <meta name="description" content="Multi-agent AI research system with LangGraph, tool calling, structured output, and human-in-the-loop approval workflows.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <!-- ===== BACKGROUND EFFECTS ===== -->
+    <div class="bg-grid"></div>
+    <div class="bg-glow bg-glow-1"></div>
+    <div class="bg-glow bg-glow-2"></div>
+
+    <!-- ===== HEADER ===== -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/>
+                        <path d="M2 12h20"/>
+                    </svg>
+                </div>
+                <span class="logo-text">Enterprise Research Agent</span>
+            </div>
+            <div class="header-badges">
+                <span class="badge badge-langgraph">LangGraph</span>
+                <span class="badge badge-groq">Groq</span>
+                <span class="badge badge-hil">Human-in-the-Loop</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <main class="main">
+        <!-- === Input Section === -->
+        <section class="input-section" id="input-section">
+            <h1 class="section-title">AI Research Assistant</h1>
+            <p class="section-subtitle">Multi-agent system that plans, researches, extracts, writes, and reviews professional reports.</p>
+            
+            <div class="input-card">
+                <div class="input-wrapper">
+                    <textarea 
+                        id="query-input" 
+                        placeholder="e.g., Analyze Nvidia's AI business strategy for 2026. Include competitors, risks, growth opportunities, and references."
+                        rows="3"
+                    ></textarea>
+                    <button id="submit-btn" class="btn-primary" onclick="startResearch()">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/>
+                        </svg>
+                        Start Research
+                    </button>
+                </div>
+                <div class="input-hints">
+                    <button class="hint-chip" onclick="setQuery('Analyze Nvidia\\'s AI business strategy for 2026')">Nvidia AI Strategy</button>
+                    <button class="hint-chip" onclick="setQuery('Compare Tesla and BYD electric vehicle market positions')">Tesla vs BYD</button>
+                    <button class="hint-chip" onclick="setQuery('Analyze the impact of AI agents on software engineering jobs')">AI & Software Jobs</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- === Pipeline Visualization === -->
+        <section class="pipeline-section hidden" id="pipeline-section">
+            <div class="agent-status-card">
+                <div class="status-indicator">
+                    <div class="spinner-large" id="status-spinner"></div>
+                    <div class="status-icon hidden" id="status-icon"></div>
+                </div>
+                <div class="agent-status-info">
+                    <h3 id="agent-current-action">Initializing Research...</h3>
+                    <p id="agent-sub-action">Preparing agent memory and scheduling tasks.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- === Approval Section (HIL) === -->
+        <section class="approval-section hidden" id="approval-section">
+            <div class="approval-card">
+                <div class="approval-header">
+                    <div class="approval-icon">👤</div>
+                    <h2>Human Review Required</h2>
+                    <p>Review the research findings before report generation.</p>
+                </div>
+                <div class="approval-stats" id="approval-stats"></div>
+                <div class="approval-findings" id="approval-findings"></div>
+                
+                <div class="feedback-container">
+                    <label for="rejection-feedback">Rejection Feedback (Required if rejecting):</label>
+                    <textarea 
+                        id="rejection-feedback" 
+                        placeholder="Explain what specific topics, details, or directions the researcher should focus on next (e.g., 'Look more into competitor pricing and cloud strategies')."
+                        rows="3"
+                    ></textarea>
+                </div>
+
+                <div class="approval-actions">
+                    <button class="btn-approve" onclick="approveResearch(true)">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="20 6 9 17 4 12"/>
+                        </svg>
+                        Approve & Generate Report
+                    </button>
+                    <button class="btn-reject" onclick="approveResearch(false)">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                        </svg>
+                        Reject & Re-research
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- === Report Section === -->
+        <section class="report-section hidden" id="report-section">
+            <div class="report-header">
+                <h2 class="section-title-sm">Generated Report</h2>
+                <div class="report-meta" id="report-meta"></div>
+            </div>
+            <div class="report-content" id="report-content"></div>
+        </section>
+
+        <!-- === Metrics Section === -->
+        <section class="metrics-section hidden" id="metrics-section">
+            <h2 class="section-title-sm">Evaluation Metrics</h2>
+            <div class="metrics-grid" id="metrics-grid"></div>
+        </section>
+    </main>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="footer">
+        <p>Built with LangGraph • LangChain • Groq • FastAPI • PostgreSQL</p>
+    </footer>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+services:
+  app:
+    build: .
+    ports:
+      - "7860:7860"
+    env_file:
+      - .env
+    environment:
+      # DB URLs come from .env (pointing to Neon cloud)
+      # Override APP_ENV for production logging
+      - APP_ENV=production
+    restart: unless-stopped
+
+# No local PostgreSQL needed — using Neon cloud (free, always-on)
+
